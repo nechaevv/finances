@@ -1,2 +1,5 @@
-*.class
+target
+project/project
+/.idea
+/node_modules
 *.log
