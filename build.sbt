@@ -51,9 +51,9 @@ lazy val root = crossProject(JSPlatform, JVMPlatform).in(file("."))
     ),
     scalacOptions ++= Seq("-P:scalajs:sjsDefinedByDefault", "-feature", "-deprecation"),
     scalaJSOutputMode := OutputMode.ECMAScript6,
-    scalaJSModuleKind := ModuleKind.ESModule,
-    scalaJSLinkerConfig := scalaJSLinkerConfig.value.withRelativizeSourceMapBase(
-      Some((artifactPath in (Compile, fastOptJS)).value.toURI)),
+    scalaJSLinkerConfig := scalaJSLinkerConfig.value
+      .withRelativizeSourceMapBase(Some((artifactPath in (Compile, fastOptJS)).value.toURI))
+      .withModuleKind(ModuleKind.ESModule),
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
   )
 
