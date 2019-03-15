@@ -33,7 +33,8 @@ lazy val root = crossProject(JSPlatform, JVMPlatform).in(file("."))
       "ch.qos.logback" % "logback-classic"  % "1.2.3",
       "com.typesafe"   % "config"           % "1.3.2",
       "org.scalatest" %% "scalatest"        % "3.0.5" % "test",
-      "org.scala-lang.modules" %% "scala-xml" % "1.1.1"
+      "org.scala-lang.modules" %% "scala-xml" % "1.1.1",
+      "org.parboiled" %% "parboiled"        % "2.1.5"
     ),
     scalacOptions ++= Seq("-Ypartial-unification", "-feature", "-deprecation"),
     addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9")

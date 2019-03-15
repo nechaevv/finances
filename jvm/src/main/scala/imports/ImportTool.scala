@@ -17,7 +17,7 @@ object ImportTool extends IOApp {
 
   def doImportFile(orgId: UUID, mode: String, fileName: String): IO[ExitCode] = {
     mode match {
-      case "ofx-xml" ⇒
+      case "ofx-sgml" ⇒
     }
   }
 
