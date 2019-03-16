@@ -14,8 +14,10 @@ case class BankTransactionRecord
 
   accountReferenceId: String,
   transactionReferenceId: String,
-  transactionDate: LocalDateTime,
-  postedDate: LocalDateTime, amount: BigDecimal
+  //transactionDate: LocalDateTime,
+  postedDate: LocalDateTime,
+  amount: BigDecimal,
+  description: String
 )
 
 case class AccountBalanceRecord
