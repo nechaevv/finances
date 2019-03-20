@@ -1,5 +1,0 @@
-package imports
-
-object ImportController {
-
-}

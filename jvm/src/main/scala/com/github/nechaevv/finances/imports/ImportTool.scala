@@ -1,13 +1,16 @@
-package imports
+package com.github.nechaevv.finances.imports
 
 import java.nio.file.{Files, Paths}
 import java.util.UUID
 
 import cats.effect._
+import com.github.nechaevv.finances.transactions.BankTransactionRepository
 import org.parboiled2.ParseError
 
 object ImportTool extends IOApp {
   private val log = org.log4s.getLogger
+
+  import com.github.nechaevv.finances.ComponentRepository._
 
   override def run(args: List[String]): IO[ExitCode] = args match {
     case orgId :: mode :: fileName :: Nil ⇒ doImportFile(UUID.fromString(orgId), mode, fileName)
@@ -21,10 +24,11 @@ object ImportTool extends IOApp {
     mode match {
       case "ofx-sgml" ⇒
         log.info(s"Loading transactions from $fileName")
-        OfxSgmlImporter.importAccountRecords(Files.readAllBytes(Paths.get(fileName))).map(data ⇒ {
+        OfxSgmlImporter.importAccountRecords(Files.readAllBytes(Paths.get(fileName))).flatMap(data ⇒ {
           log.info(s"Loaded ${data.transactions.length} records for ${data.bankReferenceId}")
           for(tx ← data.transactions) log.info(s"Transaction: $tx")
-        ExitCode.Success
+          implicitly[BankTransactionRepository].updateRecords(orgId, data.transactions)
+              .map(_ ⇒ ExitCode.Success)
       }).handleErrorWith({
         case ex: ParseError ⇒
           log.error("Parse error: " + ex.toString())

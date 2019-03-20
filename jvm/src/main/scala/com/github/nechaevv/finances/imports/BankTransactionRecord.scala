@@ -1,4 +1,4 @@
-package imports
+package com.github.nechaevv.finances.imports
 
 import java.time.LocalDateTime
 
@@ -14,7 +14,7 @@ case class BankTransactionRecord
 
   accountReferenceId: String,
   transactionReferenceId: String,
-  //transactionDate: LocalDateTime,
+  transactionDate: LocalDateTime,
   postedDate: LocalDateTime,
   amount: BigDecimal,
   description: String

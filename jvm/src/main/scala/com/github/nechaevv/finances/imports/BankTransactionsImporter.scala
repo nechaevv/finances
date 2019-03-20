@@ -1,4 +1,4 @@
-package imports
+package com.github.nechaevv.finances.imports
 
 import cats.effect.IO
 

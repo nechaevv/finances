@@ -1,4 +1,4 @@
-package imports
+package com.github.nechaevv.finances.imports
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -15,15 +15,20 @@ object OfxSgmlImporter extends BankTransactionsImporter {
       .map(ofxData ⇒
         BankAccountTransactionsRecord(
           ofxData.bankData.fid,
-          ofxData.transactions.map(tx ⇒
+          ofxData.transactions.map(tx ⇒ {
+            val postedDate = LocalDate.from(dateFormatter.parse(tx.datePosted.take(8))).atStartOfDay()
+            val txDate = tx.dateUser.fold(postedDate)(dt ⇒ {
+              LocalDate.from(dateFormatter.parse(dt.take(8))).atStartOfDay()
+            })
             BankTransactionRecord(
               ofxData.accountId,
               tx.id,
-              LocalDate.from(dateFormatter.parse(tx.date.take(8))).atStartOfDay(),
+              txDate,
+              postedDate,
               BigDecimal(tx.amount),
               unescape(tx.name)
             )
-          ),
+          }),
           None
         )
       )
@@ -33,6 +38,10 @@ object OfxSgmlImporter extends BankTransactionsImporter {
     scala.xml.Utility.Escapes.escMap.foldLeft(s)((s,kv) ⇒ s.replaceAll(kv._2, kv._1.toString))
   }
 }
+
+case class OfxData(bankData: BankData, accountId: String, transactions: Seq[TransactionData])
+case class BankData(org: String, fid: String)
+case class TransactionData(datePosted: String, dateUser: Option[String], amount: String, id: String, name: String)
 
 class OfxSgmlParser(val input: ParserInput) extends Parser {
   import CharPredicate._
@@ -52,8 +61,9 @@ class OfxSgmlParser(val input: ParserInput) extends Parser {
 
   def transactionTag = rule {
     "<STMTTRN>" ~ zeroOrMore(WhiteSpaceChar) ~
-    zeroOrMore(&(!dateTag) ~ anyTag) ~
-    dateTag ~
+    zeroOrMore(&(!datePostedTag) ~ anyTag) ~
+    datePostedTag ~
+    dateUserTag.? ~
     zeroOrMore(&(!amountTag) ~ anyTag) ~
     amountTag ~
     zeroOrMore(&(!trnIdTag) ~ anyTag) ~
@@ -73,7 +83,8 @@ class OfxSgmlParser(val input: ParserInput) extends Parser {
 
   def anyTag = rule { '<' ~ text /* ~ optional('/') ~ oneOrMore(AlphaNum + '.') ~ '>' ~ text */ ~ zeroOrMore(WhiteSpaceChar)}
 
-  def dateTag = rule { "<DTPOSTED>" ~ capture(date) ~ text ~ zeroOrMore(WhiteSpaceChar) }
+  def datePostedTag = rule { "<DTPOSTED>" ~ capture(date) ~ text ~ zeroOrMore(WhiteSpaceChar) }
+  def dateUserTag = rule { "<DTUSER>" ~ capture(date) ~ text ~ zeroOrMore(WhiteSpaceChar) }
   def amountTag = rule { "<TRNAMT>" ~ capture(number) ~ zeroOrMore(WhiteSpaceChar) }
   def trnIdTag = rule { "<FITID>" ~ capture(text) ~ zeroOrMore(WhiteSpaceChar) }
   def nameTag = rule { "<NAME>" ~ capture(text) ~ zeroOrMore(WhiteSpaceChar)}
@@ -83,11 +94,6 @@ class OfxSgmlParser(val input: ParserInput) extends Parser {
   def text = rule { zeroOrMore(All -- Seq('\n','\r','<')) }
 
 }
-
-case class OfxData(bankData: BankData, accountId: String, transactions: Seq[TransactionData])
-case class BankData(org: String, fid: String)
-case class TransactionData(date: String, amount: String, id: String, name: String)
-
 
 object OfxParser {
   val WhiteSpaceChar = CharPredicate(" \n\r\t\f")

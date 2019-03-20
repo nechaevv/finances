@@ -1,3 +1,5 @@
+package com.github.nechaevv.finances
+
 import cats.effect.{ExitCode, IO, IOApp}
 import org.http4s.server.blaze.BlazeServerBuilder
 
