@@ -15,7 +15,7 @@ create table "Banks"
 
 create table "BankAccounts"
 (
-  "OrganizationId" uuid,
+  "OrganizationId" uuid not null,
   "BankAccountId" serial,
   "Description" varchar(100) not null,
   "ReferenceId" varchar(30),
@@ -27,15 +27,15 @@ create table "BankAccounts"
 create table "BankTransactions"
 (
   "OrganizationId" uuid not null,
-  "BankTransactionId" serial,
   "BankAccountId" int not null,
+  "BankTransactionId" serial,
   "TransactionDate" timestamp not null,
   "PostingDate" timestamp not null,
   "ReferenceId" varchar(50),
   "Description" varchar(250),
   "Amount" numeric(14,2) not null,
   "CreatedOn" timestamp not null default now(),
-  primary key ("OrganizationId", "BankTransactionId"),
+  primary key ("OrganizationId", "BankAccountId", "BankTransactionId"),
   foreign key ("OrganizationId", "BankAccountId") references "BankAccounts"("OrganizationId", "BankAccountId"),
   unique ("OrganizationId", "BankAccountId", "ReferenceId")
 )
